@@ -7,7 +7,6 @@ import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 
 import static am.aua.solver.core.Parser.toSLE;
@@ -16,7 +15,7 @@ public class EquationSolverGUI implements ActionListener {
 
     private final JTextArea input;
     private final JLabel output;
-    private final JButton button;
+    private final JButton solveButton;
     private final JButton clearButton;
 
 
@@ -26,8 +25,8 @@ public class EquationSolverGUI implements ActionListener {
         Color background = new Color(39, 43, 112);
         Color backgroundTwo = new Color(61, 64, 128);
 
-        button = new JButton("Solve");
-        button.addActionListener(this);
+        solveButton = new JButton("Solve");
+        solveButton.addActionListener(this);
 
         clearButton = new JButton("Clear");
         clearButton.addActionListener(this);
@@ -39,22 +38,22 @@ public class EquationSolverGUI implements ActionListener {
         output = new JLabel();
         output.setForeground(Color.WHITE);
 
-        JLabel blankLabel = new JLabel("            Write your equations above -> Press SOLVE -> Get solution below");
-        blankLabel.setForeground(Color.WHITE);
+        JLabel label = new JLabel("            Write your equations above -> Press SOLVE -> Get solution below");
+        label.setForeground(Color.WHITE);
 
         JPanel panel = new JPanel();
 
         panel.setLayout(new GridLayout(4, 1));
         panel.setBackground(background);
         panel.add(input);
-        panel.add(blankLabel);
+        panel.add(label);
         labelPanel.add(output);
         panel.add(labelPanel);
 
         JPanel innerPanel = new JPanel();
         innerPanel.setLayout(new FlowLayout());
 
-        innerPanel.add(button);
+        innerPanel.add(solveButton);
         innerPanel.add(clearButton);
 
         panel.add(innerPanel);
@@ -70,13 +69,12 @@ public class EquationSolverGUI implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
 
-        if(e.getSource() == button) {
+        if(e.getSource() == solveButton) {
             if (Objects.equals(input.getText(), "")) {
                 output.setText("Input field is empty");
             } else {
 
                 String[] tempEquations = input.getText().split("\n");
-
                 ArrayList<String> updatedEquations = new ArrayList<>();
 
                 for (String tempEquation : tempEquations) {
@@ -86,7 +84,13 @@ public class EquationSolverGUI implements ActionListener {
                 }
 
                 ArrayList<String> equations = new ArrayList<String>(updatedEquations);
-                SLE sle = toSLE(equations);
+                SLE sle = null;
+                try {
+                    sle = toSLE(equations);
+                } catch (InfinitelyManySolutionsException u) {
+                    output.setText("Infinitely many solutions");
+                    return;
+                }
 
                 if (sle != null) {
                     String sol = "";
@@ -95,7 +99,7 @@ public class EquationSolverGUI implements ActionListener {
                     }
                     output.setText(sol);
                 } else {
-                    output.setText("Solution for the problem is not supported yet :/");
+                    output.setText("Solution for the problem is not supported yet :/");  // This includes NoRealSolution exception (planing to add Complex plane in future versions)
                 }
             }
         }
