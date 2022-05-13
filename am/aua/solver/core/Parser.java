@@ -23,6 +23,10 @@ public final class Parser {
         }
 
         variables = uniqueVariables;
+        
+        if (equations.size() < variables.size()) {
+            throw new InfinitelyManySolutionsException();
+        }
 
         // FORMATTING
         // splits into terms array ie 1D array becomes 2D
